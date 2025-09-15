@@ -32,12 +32,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/openapi-mock-interface.git"
+    "url": "https://github.com/lershuan/openapi-mock-interface.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/openapi-mock-interface/issues"
+    "url": "https://github.com/lershuan/openapi-mock-interface/issues"
   },
-  "homepage": "https://github.com/yourusername/openapi-mock-interface#readme",
+  "homepage": "https://github.com/lershuan/openapi-mock-interface#readme",
   "engines": {
     "node": ">=16.0.0"
   },
