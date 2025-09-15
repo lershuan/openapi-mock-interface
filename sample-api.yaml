@@ -1,0 +1,386 @@
+openapi: 3.0.0
+info:
+  title: Sample E-Commerce API
+  version: 1.0.0
+  description: A sample e-commerce API with products, orders, and users
+  contact:
+    name: API Support
+    email: support@example.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.example.com/v1
+    description: Production server
+
+paths:
+  /products:
+    get:
+      operationId: getProducts
+      summary: Get all products
+      description: Retrieve a list of all products with optional filtering
+      tags:
+        - Products
+      parameters:
+        - name: category
+          in: query
+          description: Filter by product category
+          schema:
+            type: string
+            enum: [electronics, clothing, books, home]
+        - name: limit
+          in: query
+          description: Number of products to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+              examples:
+                electronics:
+                  summary: Electronics products
+                  value:
+                    - id: 1
+                      name: "iPhone 15"
+                      price: 999.99
+                      category: "electronics"
+                      inStock: true
+                    - id: 2
+                      name: "MacBook Pro"
+                      price: 1999.99
+                      category: "electronics"
+                      inStock: true
+    post:
+      operationId: createProduct
+      summary: Create a new product
+      tags:
+        - Products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+            example:
+              name: "New Product"
+              price: 299.99
+              category: "electronics"
+              description: "A great new product"
+      responses:
+        "201":
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{id}:
+    get:
+      operationId: getProductById
+      summary: Get product by ID
+      tags:
+        - Products
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Product ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Product found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /orders:
+    get:
+      operationId: getOrders
+      summary: Get all orders
+      tags:
+        - Orders
+      responses:
+        "200":
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+    post:
+      operationId: createOrder
+      summary: Create a new order
+      tags:
+        - Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderRequest"
+      responses:
+        "201":
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /users:
+    get:
+      operationId: getUsers
+      summary: Get all users
+      tags:
+        - Users
+      responses:
+        "200":
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+components:
+  schemas:
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - price
+        - category
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: Unique product identifier
+        name:
+          type: string
+          example: "iPhone 15"
+          description: Product name
+        price:
+          type: number
+          format: decimal
+          example: 999.99
+          description: Product price
+        category:
+          type: string
+          enum: [electronics, clothing, books, home]
+          example: "electronics"
+          description: Product category
+        description:
+          type: string
+          example: "Latest iPhone with advanced features"
+          description: Product description
+        inStock:
+          type: boolean
+          example: true
+          description: Whether product is in stock
+        tags:
+          type: array
+          items:
+            type: string
+          example: ["smartphone", "apple", "premium"]
+          description: Product tags
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-09-15T10:30:00Z"
+          description: Creation timestamp
+
+    CreateProductRequest:
+      type: object
+      required:
+        - name
+        - price
+        - category
+      properties:
+        name:
+          type: string
+          example: "New Product"
+          description: Product name
+        price:
+          type: number
+          format: decimal
+          example: 299.99
+          description: Product price
+        category:
+          type: string
+          enum: [electronics, clothing, books, home]
+          example: "electronics"
+          description: Product category
+        description:
+          type: string
+          example: "A great new product"
+          description: Product description
+
+    Order:
+      type: object
+      required:
+        - id
+        - userId
+        - products
+        - total
+        - status
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: Unique order identifier
+        userId:
+          type: integer
+          format: int64
+          example: 123
+          description: User who placed the order
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+          description: Products in the order
+        total:
+          type: number
+          format: decimal
+          example: 1299.98
+          description: Total order amount
+        status:
+          type: string
+          enum: [pending, processing, shipped, delivered, cancelled]
+          example: "pending"
+          description: Order status
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-09-15T10:30:00Z"
+          description: Order creation timestamp
+
+    OrderItem:
+      type: object
+      required:
+        - productId
+        - quantity
+        - price
+      properties:
+        productId:
+          type: integer
+          format: int64
+          example: 1
+          description: Product ID
+        quantity:
+          type: integer
+          minimum: 1
+          example: 2
+          description: Quantity ordered
+        price:
+          type: number
+          format: decimal
+          example: 999.99
+          description: Price per unit
+
+    CreateOrderRequest:
+      type: object
+      required:
+        - userId
+        - products
+      properties:
+        userId:
+          type: integer
+          format: int64
+          example: 123
+          description: User ID
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+          description: Products to order
+
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - email
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+          description: Unique user identifier
+        name:
+          type: string
+          example: "John Doe"
+          description: User's full name
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+          description: User's email address
+        age:
+          type: integer
+          minimum: 0
+          maximum: 120
+          example: 30
+          description: User's age
+        role:
+          type: string
+          enum: [admin, user, moderator]
+          example: "user"
+          description: User's role
+        isActive:
+          type: boolean
+          example: true
+          description: Whether user is active
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-01-15T10:30:00Z"
+          description: Account creation timestamp
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: "NOT_FOUND"
+          description: Error code
+        message:
+          type: string
+          example: "Product not found"
+          description: Error message
+        details:
+          type: object
+          description: Additional error details

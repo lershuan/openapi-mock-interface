@@ -1,0 +1,54 @@
+{
+  "name": "openapi-mock-interface",
+  "version": "1.0.0",
+  "description": "A comprehensive Node.js library for retrieving, parsing, and mocking OpenAPI specifications. Create mock servers with realistic data from any OpenAPI spec.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test src/test/*.test.js",
+    "example:basic": "node examples/basic-usage.js",
+    "example:advanced": "node examples/advanced-usage.js",
+    "example:yaml": "node load-yaml-api.js sample-api.yaml",
+    "example:custom": "node my-custom-api.js"
+  },
+  "keywords": [
+    "openapi",
+    "swagger",
+    "api",
+    "mock",
+    "parser",
+    "specification",
+    "yaml",
+    "json",
+    "rest",
+    "testing",
+    "development",
+    "mock-server",
+    "api-mocking"
+  ],
+  "author": "OpenAPI Mock Interface Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/openapi-mock-interface.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/openapi-mock-interface/issues"
+  },
+  "homepage": "https://github.com/yourusername/openapi-mock-interface#readme",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "swagger-parser": "^10.0.3",
+    "yaml": "^2.3.4",
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
