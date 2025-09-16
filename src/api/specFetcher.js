@@ -1,5 +1,7 @@
 import axios from "axios";
 import YAML from "yaml";
+import fs from "fs";
+import path from "path";
 
 /**
  * OpenAPI Specification Fetcher
@@ -59,10 +61,7 @@ export class OpenAPISpecFetcher {
     try {
       console.log(`Loading OpenAPI spec from file: ${filePath}`);
 
-      const fs = await import("fs/promises");
-      const path = await import("path");
-
-      const fileContent = await fs.readFile(filePath, "utf8");
+      const fileContent = await fs.promises.readFile(filePath, "utf8");
       const ext = path.extname(filePath).toLowerCase();
 
       return this.parseSpecification(
@@ -86,8 +85,10 @@ export class OpenAPISpecFetcher {
     try {
       const hasContentType = typeof contentType === "string";
       const isYAML =
-        (hasContentType && (contentType.includes("yaml") || contentType.includes("yml"))) ||
-        (!hasContentType || !contentType.includes("json"));
+        (hasContentType &&
+          (contentType.includes("yaml") || contentType.includes("yml"))) ||
+        !hasContentType ||
+        !contentType.includes("json");
 
       if (isYAML) {
         console.log("Parsing YAML OpenAPI specification");
@@ -151,7 +152,9 @@ export class OpenAPISpecFetcher {
       paths: Object.keys(spec.paths || {}),
       pathCount: Object.keys(spec.paths || {}).length,
       hasComponents: !!spec.components,
-      hasSecurity: !!spec.security || !!(spec.components && spec.components.securitySchemes),
+      hasSecurity:
+        !!spec.security ||
+        !!(spec.components && spec.components.securitySchemes),
     };
   }
 }
