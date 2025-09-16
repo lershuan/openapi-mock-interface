@@ -84,10 +84,10 @@ export class OpenAPISpecFetcher {
    */
   parseSpecification(content, contentType) {
     try {
+      const hasContentType = typeof contentType === "string";
       const isYAML =
-        contentType?.includes("yaml") ||
-        contentType?.includes("yml") ||
-        !contentType?.includes("json");
+        (hasContentType && (contentType.includes("yaml") || contentType.includes("yml"))) ||
+        (!hasContentType || !contentType.includes("json"));
 
       if (isYAML) {
         console.log("Parsing YAML OpenAPI specification");
@@ -144,14 +144,14 @@ export class OpenAPISpecFetcher {
 
     return {
       openapiVersion: spec.openapi,
-      title: spec.info?.title || "Unknown",
-      version: spec.info?.version || "Unknown",
-      description: spec.info?.description || "",
+      title: (spec.info && spec.info.title) || "Unknown",
+      version: (spec.info && spec.info.version) || "Unknown",
+      description: (spec.info && spec.info.description) || "",
       servers: spec.servers || [],
       paths: Object.keys(spec.paths || {}),
       pathCount: Object.keys(spec.paths || {}).length,
       hasComponents: !!spec.components,
-      hasSecurity: !!spec.security || !!spec.components?.securitySchemes,
+      hasSecurity: !!spec.security || !!(spec.components && spec.components.securitySchemes),
     };
   }
 }

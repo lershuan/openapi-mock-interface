@@ -113,7 +113,7 @@ export class OpenAPISpecParser {
   extractSchemas(spec) {
     const schemas = {};
 
-    if (spec.components?.schemas) {
+    if (spec.components && spec.components.schemas) {
       Object.assign(schemas, spec.components.schemas);
     }
 
@@ -136,7 +136,7 @@ export class OpenAPISpecParser {
   extractSecuritySchemes(spec) {
     const securitySchemes = {};
 
-    if (spec.components?.securitySchemes) {
+    if (spec.components && spec.components.securitySchemes) {
       Object.assign(securitySchemes, spec.components.securitySchemes);
     }
 
@@ -331,7 +331,7 @@ export class OpenAPISpecParser {
       for (const operation of Object.values(pathItem)) {
         if (typeof operation === "object" && operation !== null) {
           // Extract from request body
-          if (operation.requestBody?.content) {
+          if (operation.requestBody && operation.requestBody.content) {
             for (const mediaType of Object.values(
               operation.requestBody.content
             )) {
