@@ -36,6 +36,42 @@ def ensure_node_available() -> str:
     )
 
 
+def ensure_npm_available() -> str:
+    candidates = [
+        shutil.which("npm"),
+        "/usr/bin/npm",
+        "/usr/local/bin/npm",
+    ]
+    for path in candidates:
+        if path and os.path.exists(path):
+            return path
+    raise RuntimeError(
+        "npm not found in PATH. On Streamlit Cloud, add 'npm' to packages.txt."
+    )
+
+
+def ensure_node_dependencies_installed(log_path: str) -> None:
+    # Simple guard: if axios and express exist in node_modules, assume install ok
+    axios_dir = PROJECT_ROOT / "node_modules" / "axios"
+    express_dir = PROJECT_ROOT / "node_modules" / "express"
+    if axios_dir.exists() and express_dir.exists():
+        return
+
+    npm_exec = ensure_npm_available()
+    with open(log_path, "a", buffering=1) as log_file:
+        log_file.write("\nInstalling Node dependencies with 'npm ci --omit=dev'...\n")
+        proc = subprocess.run(
+            [npm_exec, "ci", "--omit=dev"],
+            cwd=str(PROJECT_ROOT),
+            stdout=log_file,
+            stderr=subprocess.STDOUT,
+            text=True,
+            check=False,
+        )
+        if proc.returncode != 0:
+            raise RuntimeError("npm ci failed. See Server Logs for details.")
+
+
 def write_uploaded_file(uploaded) -> str:
     suffix = pathlib.Path(uploaded.name).suffix or ".yaml"
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
@@ -50,6 +86,7 @@ def start_server(spec_path: str, port: int, host: str, log_path: str) -> subproc
         raise FileNotFoundError(f"Missing script: {NODE_SCRIPT}")
 
     node_exec = ensure_node_available()
+    ensure_node_dependencies_installed(log_path)
 
     # Open log file for appending; stream Node output here
     log_file = open(log_path, "a", buffering=1)
