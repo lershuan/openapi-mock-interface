@@ -19,11 +19,13 @@ async function loadYAMLAPI(yamlFilePath) {
       throw new Error(`File must be a YAML file (.yaml or .yml), got: ${ext}`);
     }
 
-    // Create interface
+    // Create interface (read HOST/PORT from env if provided)
+    const port = Number(process.env.PORT || 8000);
+    const host = process.env.HOST || "localhost";
     const mockInterface = new OpenAPIMockInterface({
       server: {
-        port: 8000, // Default port
-        host: "localhost",
+        port,
+        host,
       },
     });
 
