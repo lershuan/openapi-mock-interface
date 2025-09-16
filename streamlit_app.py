@@ -19,12 +19,21 @@ NODE_SCRIPT = PROJECT_ROOT / "load-yaml-api.js"
 
 
 def ensure_node_available() -> str:
-    node_path = shutil.which("node")
-    if not node_path:
-        raise RuntimeError(
-            "Node.js not found in PATH. On Streamlit Cloud, add 'nodejs' and 'npm' to packages.txt."
-        )
-    return node_path
+    # Try common node executable names/paths
+    candidates = [
+        shutil.which("node"),
+        shutil.which("nodejs"),
+        "/usr/bin/node",
+        "/usr/local/bin/node",
+        "/usr/bin/nodejs",
+        "/usr/local/bin/nodejs",
+    ]
+    for path in candidates:
+        if path and os.path.exists(path):
+            return path
+    raise RuntimeError(
+        "Node.js not found in PATH. On Streamlit Cloud, add 'nodejs' and 'npm' to packages.txt."
+    )
 
 
 def write_uploaded_file(uploaded) -> str:
@@ -40,7 +49,7 @@ def start_server(spec_path: str, port: int, host: str, log_path: str) -> subproc
     if not NODE_SCRIPT.exists():
         raise FileNotFoundError(f"Missing script: {NODE_SCRIPT}")
 
-    ensure_node_available()
+    node_exec = ensure_node_available()
 
     # Open log file for appending; stream Node output here
     log_file = open(log_path, "a", buffering=1)
@@ -49,7 +58,7 @@ def start_server(spec_path: str, port: int, host: str, log_path: str) -> subproc
     env["PORT"] = str(port)
     env["HOST"] = host
 
-    cmd = ["/usr/bin/env", "node", str(NODE_SCRIPT), spec_path]
+    cmd = [node_exec, str(NODE_SCRIPT), spec_path]
 
     proc = subprocess.Popen(
         cmd,
