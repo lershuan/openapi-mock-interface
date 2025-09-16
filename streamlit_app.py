@@ -140,6 +140,22 @@ def tail_file(path: str, max_bytes: int = 16_000) -> str:
         return ""
 
 
+def wait_for_server_ready(host: str, port: int, timeout_seconds: int = 20) -> tuple[bool, str]:
+    base = base_url(host, port)
+    start = time.time()
+    last_error = ""
+    while time.time() - start < timeout_seconds:
+        try:
+            r = requests.get(f"{base}/health", timeout=2)
+            if r.ok:
+                return True, ""
+            last_error = f"HTTP {r.status_code}"
+        except Exception as e:
+            last_error = str(e)
+        time.sleep(0.5)
+    return False, last_error
+
+
 # --- Streamlit UI ---
 st.set_page_config(page_title="OpenAPI Mock Interface", page_icon="🧪", layout="wide")
 st.title("OpenAPI Mock Server Controller")
@@ -176,8 +192,12 @@ with st.sidebar:
                     pass
                 proc = start_server(st.session_state.spec_path, int(port), host, st.session_state.log_path)
                 st.session_state.server_proc = proc
-                time.sleep(0.3)
-                st.success("Server started")
+                ok, err = wait_for_server_ready(host, int(port), timeout_seconds=25)
+                if ok:
+                    st.success("Server started and is healthy")
+                else:
+                    st.error(f"Server failed health check: {err}")
+                    st.info("Check Server Logs on the right for details.")
             except Exception as e:
                 st.error(f"Failed to start server: {e}")
 
